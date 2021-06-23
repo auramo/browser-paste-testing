@@ -1,0 +1,17 @@
+<script>
+async function paste() {
+  //  const text = await navigator.clipboard.readText();
+  const clipboardItems = await navigator.clipboard.read();
+  console.log(clipboardItems);
+  for (const clipboardItem of clipboardItems) {
+    const html = await clipboardItem.getType("text/html");
+    console.log(await html.text())    
+  }
+  
+}
+
+</script>
+
+<h1> moro </h1>
+
+<button onclick=paste()>pastee</button>

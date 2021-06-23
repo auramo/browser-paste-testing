@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Paste testing</title>
+  <script>
+    async function paste() {
+      const clipboardItems = await navigator.clipboard.read();
+      for (const clipboardItem of clipboardItems) {
+        try {
+          const html = await clipboardItem.getType("text/html");
+          const pastedHtml = await html.text()  
+          document.querySelector('#pasteContents').innerHTML = pastedHtml
+          document.querySelector('#pasteHeading').style.display = 'block'
+        } catch (e) {
+          console.log(e)
+        }
+      }
+    }
+    </script>
+</head>
+
+<body>
+  <button onclick=paste()>Tuo leikepöydältä</button>
+  <strong id="pasteHeading" style="display: none; margin-top: 20px;">Pastetut kamat:</strong>
+  <div id="pasteContents"/>
+</body>
+</html>
