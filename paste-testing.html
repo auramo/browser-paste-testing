@@ -4,25 +4,49 @@
   <meta charset="utf-8">
   <title>Paste testing</title>
   <script>
+    function getFirstColumnData (htmlDoc) {
+      const tbodyTags = Array.from(htmlDoc.firstChild.childNodes).filter(node => node.nodeName === 'tbody')
+      if (tbodyTags.length !== 1) return null
+      const trTags = Array.from(tbodyTags[0].childNodes).filter(node => node.nodeName === 'tr')
+      if (trTags.length < 1) return null
+      return trTags.map(trTag => {
+        const tdTags = Array.from(trTag.childNodes).filter(node => node.nodeName === 'td')
+        if (tdTags.length < 1) return null
+        return tdTags[0].textContent
+      })
+      .filter(textContent => textContent !== null)
+      .map(textContent => textContent.trim())
+    }
+
     async function paste() {
       const clipboardItems = await navigator.clipboard.read();
       for (const clipboardItem of clipboardItems) {
         try {
           const html = await clipboardItem.getType("text/html");
           const pastedHtml = await html.text()  
-          document.querySelector('#pasteContents').innerHTML = pastedHtml
-          document.querySelector('#pasteHeading').style.display = 'block'
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(pastedHtml, 'text/xml');
+          const firstColumnData = getFirstColumnData(htmlDoc)
+          console.log('first column data:')
+          console.log(firstColumnData)
+          if (firstColumnData && firstColumnData.length > 0) {
+            document.querySelector('#pasteContents').innerHTML = firstColumnData.join('\r\n')
+            document.querySelector('#pasteResult').style.display = 'block'
+          }
         } catch (e) {
+          console.log('Virhe:')
           console.log(e)
         }
       }
     }
     </script>
 </head>
-
 <body>
   <button onclick=paste()>Tuo leikepöydältä</button>
-  <strong id="pasteHeading" style="display: none; margin-top: 20px;">Pastetut kamat:</strong>
-  <div id="pasteContents"/>
+  <div id="pasteResult" style="display: none;">
+    <br/>
+    <strong style="margin-top: 20px;">Ekan sarakkeen pastetut kamat:</strong>
+    <pre id="pasteContents" style=" background-color: #CDCDCD; padding: 5px;"/>
+  </div>
 </body>
 </html>
