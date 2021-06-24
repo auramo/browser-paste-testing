@@ -5,24 +5,36 @@
   <title>Paste testing</title>
   <script>
     async function getClipboardDataAsHtmlDocument() {
-      const clipboardItems = await navigator.clipboard.read();
+      const clipboardItems = await navigator.clipboard.read()
       for (const clipboardItem of clipboardItems) {
-          const html = await clipboardItem.getType("text/html");
+          const html = await clipboardItem.getType("text/html")
           const pastedHtml = await html.text()  
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(pastedHtml, 'text/xml');
+          const parser = new DOMParser()
+          const htmlDoc = parser.parseFromString(pastedHtml, 'text/html')
           return htmlDoc
       }
       return null
     }
 
+    function getFirstChildNamed(node, name) {
+      const tags = Array.from(node.childNodes).filter(node => node.nodeName.toLowerCase() === name.toLowerCase())
+      if (tags.length < 1) return null
+      return tags[0]
+    }
+
     function getFirstColumnData (htmlDoc) {
-      const tbodyTags = Array.from(htmlDoc.firstChild.childNodes).filter(node => node.nodeName === 'tbody')
-      if (tbodyTags.length !== 1) return null
-      const trTags = Array.from(tbodyTags[0].childNodes).filter(node => node.nodeName === 'tr')
+      const htmlTag = getFirstChildNamed(htmlDoc, 'html')
+      if (!htmlTag) return null
+      const bodyTag = getFirstChildNamed(htmlTag, 'body')
+      if (!bodyTag) return null
+      const tableTag = getFirstChildNamed(bodyTag, 'table')
+      if (!tableTag) return null
+      const tbodyTag = getFirstChildNamed(tableTag, 'tbody')
+      if (!tbodyTag) return null
+      const trTags = Array.from(tbodyTag.childNodes).filter(node => node.nodeName.toLowerCase() === 'tr')
       if (trTags.length < 1) return null
       return trTags.map(trTag => {
-        const tdTags = Array.from(trTag.childNodes).filter(node => node.nodeName === 'td')
+        const tdTags = Array.from(trTag.childNodes).filter(node => node.nodeName.toLowerCase() === 'td')
         if (tdTags.length < 1) return null
         return tdTags[0].textContent
       })
